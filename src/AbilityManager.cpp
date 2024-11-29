@@ -4,7 +4,7 @@
 AbilityManager::AbilityManager()
 {
     std::vector<AbilitiesCodes> startValues {AbilitiesCodes::MASSIVE_ATTACK, AbilitiesCodes::SCANER, AbilitiesCodes::SHELLING};
-    //shuffle(startValues.begin(), startValues.end(), rand());
+    //std::random_shuffle(startValues.begin(), startValues.end());
     for(int i = 0; i < 3; i++)
     {
         mAvaliableAbilitiesInfo.push(startValues[i]);
@@ -35,10 +35,10 @@ void AbilityManager::recieveAbility()
 
 }
 
-IAbility& AbilityManager::buildAbility(IArgs & arguments)
+IAbility& AbilityManager::buildAbility(IAbilityArguments & arguments)
 {
     Factory & abilityFactory = *(new Factory());
-    IVisitor & visitor = *(new AbilityVisitor(&abilityFactory));
+    IArgumentsVisitor & visitor = *(new ArgumentsVisitor(&abilityFactory));
     arguments.acceptVisitor(visitor);
     IAbility & ability = abilityFactory.getAbility();
     delete &abilityFactory;
@@ -46,23 +46,66 @@ IAbility& AbilityManager::buildAbility(IArgs & arguments)
     return ability;
 }
 
-void AbilityManager::useAbility(IArgs &arguments)
+IAbilityResult& AbilityManager::useAbility(IAbilityArguments &arguments)
 {
     if(mAvaliableAbilitiesInfo.size() == 0)
     {
-        throw std::length_error("0 abilities avliable");
+        throw NoAbilitiesException();
     }
     IAbility &ability = buildAbility(arguments);
-    ability.applyAbility();
+    IAbilityResult& abilityResult = ability.applyAbility();
     mAvaliableAbilitiesInfo.pop();
     delete &ability;
+    return abilityResult;
 }
 
 AbilityManager::AbilitiesCodes AbilityManager::viewAvaliableAbilities()
 {
     if(mAvaliableAbilitiesInfo.size() == 0)
     {
-        throw std::length_error("0 abilities avliable");
+        throw NoAbilitiesException();
     }
     return mAvaliableAbilitiesInfo.front();
+}
+
+std::string AbilityManager::getInfo()
+{
+    std::string res;
+    std::queue<AbilitiesCodes> tempQueue(mAvaliableAbilitiesInfo);
+
+    while(tempQueue.size() > 0)
+    {
+        res += std::to_string(tempQueue.front());
+        tempQueue.pop();
+    }
+    res += "\n";
+    return res;
+}
+
+void AbilityManager::setInfo(std::string info)
+{
+    while(mAvaliableAbilitiesInfo.size() > 0) // emty the queue
+    {
+        mAvaliableAbilitiesInfo.pop();
+    }
+
+    for(int i = 0; i < info.size(); i++) // refill the queue
+    {
+        switch (info[i])
+        {
+        case '0':
+            mAvaliableAbilitiesInfo.push(AbilitiesCodes::MASSIVE_ATTACK);
+            break;
+        
+        case '1':
+            mAvaliableAbilitiesInfo.push(AbilitiesCodes::SCANER);
+            break;
+        case '2':
+            mAvaliableAbilitiesInfo.push(AbilitiesCodes::SHELLING);
+            break;
+
+        default:
+            break;
+        }
+    }
 }

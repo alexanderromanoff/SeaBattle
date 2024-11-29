@@ -1,26 +1,29 @@
-#include "../include/Shelling.h"
+#include "../include/Abilities/Shelling/Shelling.h"
 
-Shelling::Shelling(Field* pFIeld, ShipManager* pShipManager) : mField(pFIeld), mShipManager(pShipManager)
+Shelling::Shelling(ShipManager* pShipManager) : mShipManager(pShipManager)
 {}
 
-void Shelling::applyAbility()
-{
-    std::vector<int> shipsToAttackIndices = mShipManager->getAliveShipsIndicies();
+IAbilityResult& Shelling::applyAbility()
+{   
     srand(time(NULL));
-    int randomIndex = rand() % shipsToAttackIndices.size();
+    std::vector<int> shipsToAttackIndices;
+    ShellingResult& res = *(new ShellingResult);
+    try
+    {
+        shipsToAttackIndices = mShipManager->getAliveShipsIndicies();
+    }
+    catch(NoShipsException& ex)
+    {
+        res.success = false;
+        return res;
+    }
+    
+    int randomIndex = rand() % shipsToAttackIndices.size(); 
     Battleship & shipObject = mShipManager->getShipAtIndex(randomIndex);
-    int randomSegmentIndex = rand() % shipObject.getNumberOfSegments();
-    int damage = 1;
-    // mField->setAttackPower(1);
-    shipObject.takeDamage(randomSegmentIndex, damage);
+
+    std::vector<int> segmentsToAttackIndices = shipObject.getAliveSegmentsIndices();
+    int randomSegmentIndex = rand() % segmentsToAttackIndices.size();
+    shipObject.takeDamage(randomSegmentIndex, 1);
+
+    return res;
 }
-
-// void Shelling::setField(Field & fieldObject)
-// {
-//     mFieldPointer = &fieldObject;
-// }
-
-// void Shelling::setShipManager(ShipManager & shipManagerObject)
-// {
-//     mShipManagerPointer = &shipManagerObject;
-// }

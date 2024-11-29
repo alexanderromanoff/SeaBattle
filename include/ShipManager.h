@@ -5,11 +5,14 @@
 #include <map>
 #include <vector>
 #include "Battleship.h"
+#include "../include/Exceptions/ExcepIncorrectSize.h"
+#include "../include/Exceptions/ExcepNoShips.h"
 
 class ShipManager
 {
 private:
     std::vector<Battleship *> mAvailableShips;
+    int aliveShips;
 public:
     ShipManager(const std::map<int, int> & ships_info);
     ~ShipManager();
@@ -18,8 +21,10 @@ public:
 
     void createShip(int ship_size);
     void addShips(const std::map<int, int> & ships_info);
-    void addShip(Battleship* ship_object);
+    void addShip(Battleship& ship_object);
     std::vector<int> getAliveShipsIndicies();
+    int getNumberOfShips();
+    int getNumberOfAliveShips();
     void print();
 };
 

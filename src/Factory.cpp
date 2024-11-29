@@ -1,4 +1,4 @@
-#include "../include/Factory.h"
+#include "../include/Abilities/Factory.h"
 
 void Factory::buildScaner(ScanerArgs& scArgs)
 {
@@ -7,12 +7,12 @@ void Factory::buildScaner(ScanerArgs& scArgs)
 
 void Factory::buildShelling(ShellingArgs&shArgs)
 {
-    mAbility = new Shelling(shArgs.pField, shArgs.pShipManager);
+    mAbility = new Shelling(shArgs.pShipManager);
 }
 
 void Factory::buildMassiveAttack(MassiveAttackArgs& maArgs)
 {
-    mAbility = new MassiveAttack(maArgs.pField);
+    mAbility = new MassiveAttack(maArgs.pTurnProps);
 }
 
 IAbility & Factory::getAbility()

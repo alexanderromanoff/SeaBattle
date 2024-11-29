@@ -1,5 +1,5 @@
 #include "../include/Field.h"
-#include "Cell.cpp"
+//#include "Cell.cpp"
 
     Field::Field(int height, int width) : mHorizontalSize(width), mVerticalSize(height)
     {
@@ -45,13 +45,13 @@
     }
 
 
-    void Field::attackCell(int x, int y, int attackPower = 1)
+    Field::Attack_Result Field::attackCell(int x, int y, int attackPower = 1)
     {
         if(!checkCellInField(x, y))
         {
-            throw std::invalid_argument("invalid coordinates");
+            throw OutOfFieldException(x,y);
         }
-        mFieldMap[y][x].attack(attackPower);
+        return mFieldMap[y][x].attack(attackPower);
 
     }
 
@@ -59,84 +59,90 @@
     {
         if(shipObject.isPlaced())
         {
-            throw std::logic_error("ship has already been placed");
+            throw ShipAlreadyPlacedException();
         }
 
-        try
-        {
-            checkShipPlacement(shipObject, x, y, orientation);
-        }
-        catch(const std::invalid_argument& ex)
-        {
-            std::cerr << ex.what() << "\n";
-            return;
-        }
-        catch(std::logic_error &ex)
-        {
-            std::cerr << ex.what() << "\n";
-            return;
-        }
+        // try
+        // {
+        //     checkShipPlacement(shipObject, x, y, orientation);
+        // }
+        // catch(OutOfFieldException &ex)
+        // {
+        //     std::cerr << ex.what() << "\n";
+        //     return;
+        // }
+        // catch(CollisionException &ex)
+        // {
+        //     std::cerr << ex.what() << "\n";
+        //     return;
+        // }
+
+        checkShipPlacement(shipObject, x, y, orientation);
+        
         int shipLength = shipObject.getNumberOfSegments();
         if(orientation == Battleship::Orientation::HORIZONTAL)
         {
             for(int i = 0; i < shipLength; i++)
             {
-                mFieldMap[y][x + i].addShipSegment(&shipObject, i);
+                mFieldMap[y][x + i].addShipSegment(shipObject, i);
             }
         }
         else if(orientation == Battleship::Orientation::VERTICAL)
         {
             for(int i = 0; i < shipLength; i++)
             {
-                mFieldMap[y + i][x].addShipSegment(&shipObject, i);
+                mFieldMap[y + i][x].addShipSegment(shipObject, i);
             }
         }
+
 
         shipObject.setOrientation(orientation);
         shipObject.setPlaced(true);
     }
 
-    bool Field::checkShipPlacement(Battleship & shipObject, int x_start, int y_start, Battleship::Orientation orientation)
+    bool Field::checkShipPlacement(Battleship & shipObject, int xStart, int yStart, Battleship::Orientation orientation)
     {
         bool suitable = true;
         int shipLength = shipObject.getNumberOfSegments();
 
         // default orientation is horizontal...
-        int x_end = x_start  + shipLength - 1;
-        int y_end = y_start;
+        int xEnd = xStart  + shipLength - 1;
+        int yEnd = yStart;
 
         if(orientation == Battleship::Orientation::VERTICAL)
         {
-            x_end = x_start;
-            y_end = y_start  + shipLength - 1;
+            xEnd = xStart;
+            yEnd = yStart  + shipLength - 1;
         }
-        suitable = checkCellInField(x_start, y_start) && checkCellInField(x_end, y_end);
-
-        if(!suitable)
+ 
+        if(!checkCellInField(xStart, yStart))
         {
-            throw std::invalid_argument("invalid coordinates");
+            throw OutOfFieldException(xStart,yStart);
         }
 
-        else
+        if(!checkCellInField(xEnd, yEnd))
         {
-            for(int i = x_start - 1; i <= x_end + 1; i++)
+            throw OutOfFieldException(xEnd,yEnd);
+        }
+
+        for(int i = xStart - 1; i <= xEnd + 1; i++)
+        {
+            for(int j = yStart - 1; j <= yEnd + 1; j++)
             {
-                for(int j = y_start - 1; j <= y_end + 1; j++)
+                if (!checkCellInField(i, j))
                 {
-                    if (!checkCellInField(i, j))
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    if(isCellOccupied(i, j))
-                    {
-                        suitable = false;
-                        throw std::logic_error("ships interfere");
-                        break;
-                    }
+                if(isCellOccupied(i, j))
+                {
+                    suitable = false;
+                    throw CollisionException();
+                    break;
                 }
             }
         }
+
         return suitable;
     }
 
@@ -144,15 +150,25 @@
     {
         if(!checkCellInField(x, y))
         {
-            return false;
+            throw OutOfFieldException(x, y);
+
         }
-        
         return (mFieldMap[y][x].isShipHere());
     }
 
     bool Field::checkCellInField(int x, int y)
     {
         return ((x >= 0) && (x < mHorizontalSize)) && ((y >= 0) && (y < mVerticalSize));
+    }
+
+    int Field::getHeight()
+    {
+        return mVerticalSize;
+    }
+
+    int Field::getWidth()
+    {
+        return mHorizontalSize;
     }
 
     void Field::print()
@@ -167,3 +183,57 @@
         }
         std::cout << "\n";
     }
+
+    std::string Field::getFieldMap()
+    {
+        std::string res;
+        res += std::to_string(mVerticalSize) + "\n" + std::to_string(mHorizontalSize) + "\n";
+        for(int i = 0; i < mVerticalSize; i++)
+        {
+            for(int j = 0; j < mHorizontalSize; j++)
+            {
+                res += mFieldMap[i][j].getState();
+            }
+        }
+        res += "\n";
+        return res;
+    }
+
+    void Field::setFieldMap(std::string info)
+    {
+        for(int i = 0; i < mVerticalSize; i++)
+        {
+            for(int j = 0; j < mHorizontalSize; j++)
+            {
+                int strInd = i * mVerticalSize + j;
+                mFieldMap[i][j].setState(info[strInd]);
+            }
+        }
+    }
+
+    std::string Field::getShips()
+    {
+        std::string res;
+        for(int i = 0; i< mVerticalSize; i++)
+        {
+            for(int j = 0; j < mHorizontalSize; j++)
+            {
+                if(mFieldMap[i][j].isShipHere() && mFieldMap[i][j].getNumberOFshipSegment() == 0)
+                {
+                    res += std::to_string(i) + "\n" + std::to_string(j) + "\n";
+                    Battleship& shipObject = mFieldMap[i][j].getShip();
+                    int shipSize = shipObject.getNumberOfSegments();
+                    int orientation = shipObject.getOrientation();
+                    res += std::to_string(shipSize) + std::to_string(orientation);
+                    for(int k = 0; k < shipSize; k++)
+                    {
+                        res += std::to_string(shipObject.getSegmentHealth(k));
+                    }
+                    res += "\n";
+                }
+            }
+        }
+        res += "end\n";
+        return res;
+    }
+    

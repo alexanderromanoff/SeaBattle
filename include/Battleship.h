@@ -30,10 +30,14 @@ public:
     bool isAlive();
 
     int getSegmentHealth(int index);
+    void setSegmentHealth(int index, int health);
     int getNumberOfSegments();
 
     void setPlaced(bool state);
     void setOrientation(Orientation mShipOrientation);
+    Battleship::Orientation getOrientation();
+
+    std::vector<int> getAliveSegmentsIndices();
     
     std::string represent();
 };
