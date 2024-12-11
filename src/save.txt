@@ -1,0 +1,3 @@
+{"userAbilities":"3\n","userFieldHeight":3,"userFieldState":"200010010","userFieldWidth":3,"userShips":"0\n0\n112\n"}
+{"dummyFieldHeight":3,"dummyFieldState":"00001000","dummyFieldWidth":3,"dummyShips":"0\n0\n120\n"}
+{"hash":3545196512194056711}
