@@ -38,10 +38,10 @@
         {
             if(mShipSegments[i] != Segment_States::destroyed)
             {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     bool Battleship::isPlaced()
@@ -83,4 +83,40 @@
         return res;
     }
 
+std::vector<int> Battleship::getAliveSegmentsIndices()
+{
+    std::vector<int> res;
+    for(int i = 0; i < mShipSegments.size(); i++)
+    {
+        if(mShipSegments[i] != Segment_States::destroyed)
+        {
+            res.push_back(i);
+        }
+    }
+    return res;
+}
 
+
+Battleship::Orientation Battleship::getOrientation()
+{
+    return Battleship::mShipOrientation;
+}
+
+void Battleship::setSegmentHealth(int index, int health)
+{
+    switch (health)
+    {
+    case 0:
+        mShipSegments[index] = Segment_States::destroyed;
+        break;
+    case 1:
+        mShipSegments[index] = Segment_States::damaged;
+        break;
+    case 2:
+        mShipSegments[index] = Segment_States::OK;
+        break;
+    
+    default:
+        break;
+    }
+}

@@ -1,61 +1,54 @@
 
-#include "../include/Battleship.h"
-#include "../include/Field.h"
-#include "../include/ShipManager.h"
-#include "../include/AbilityManager.h"
-#include "../include/IArgs.h"
-#include "../include/Scaner.h"
-#include <map>
+#include "../include/Game/GameController.h"
+#include "../include/Game/Game.h"
 
-Field foo(Field obj)
-{
-    obj.print();
-    
-    Field ff = Field(6, 4);
-    return obj;
-}
+#include "../include/Game/Input/IOMediator.h"
+#include "../include/Game/Input/DummyInput.h"
+#include "../include/Game/Input/ConsoleInput.h"
+#include "../include/Game/Input/InputHandler.h"
+#include "../include/Game/Input/IOInterface.h"
+
+#include "../include/Game/SaveLoad/Saver.h"
+
+#include "../include/Game/Display/GameObserver.h"
+#include "../include/Game/Display/ConsoleDisplay.h"
 
 int main() 
 {
     srand(time(NULL));
-    Battleship ship_one(1);
-    std::cout << ship_one.represent() << "\n";
-    
-    int size = 6;
-    try
+    Game* game = new Game;
+    GameController* gContr = new GameController(*game);
+
+    GameDisplayerWrapper<ConsoleDisplayer>* output = new GameDisplayerWrapper<ConsoleDisplayer>("/dev/pts/1");
+    GameObserver* gObserver = new ConcreteGameObserver(*output);
+    game->addObserver(gObserver);
+    // UserObserver* uObserver = new UserObserver(*output);
+    // DummyObserver* dObserver = new DummyObserver(*output);
+
+   // ConsoleInput* userInput = new ConsoleInput("/dev/pts/0");
+    // DummyInput* dummyInput = new DummyInput;
+
+    InputHandler* handler = new InputHandler(*gContr);
+    IODeviceWrapper<ConsoleInput>* userInput = new IODeviceWrapper<ConsoleInput>("/dev/pts/0");
+    IODeviceWrapper<DummyInput>* dummyInput = new IODeviceWrapper<DummyInput>();
+    IOMediator* mediator = new ConcreteMediator(*userInput, *dummyInput, *handler);
+
+
+
+    gContr->initController(mediator);
+    gContr->setChoice();
+    while(!gContr->interruptSignal)
     {
-        Battleship ship_two(size);
-    }    
-    catch(std::invalid_argument &ex)
-    {
-        std::cerr << ex.what() << ": " << size << "\n";
+        gContr->controlGame();
     }
+    std::cout  << "quit\n";
+    delete mediator;
+    delete handler;
+    delete dummyInput;
+    delete userInput;
 
+    delete output;
+    delete gContr;
+    delete game;
     
-
-    std::map<int, int> ships;
- 
-    ships.insert({2, 3});
-    ships.insert({7, 1});
-    ships.insert({1, 4});
-    ships.insert({4, 1});
-
-    ShipManager manager_one(ships);
-    AbilityManager man_ab;
-   // man_ab.recieveAbility(rand()%3);
-
-    man_ab.viewAvaliableAbilities();
-    
-
-    manager_one.print();
-
-    Field field_one(10, 14);
-    field_one.placeShip(manager_one.getShipAtIndex(0), 0, 0, Battleship::Orientation::HORIZONTAL);
-    std::pair<int, int> coords {10, 10};
-   // AbilityResult res{false};
-    IArgs *arrr = new ScanerArgs(coords, &field_one);
-    man_ab.useAbility(*arrr);
-    std::cout << "hh\n";
-
-
 }

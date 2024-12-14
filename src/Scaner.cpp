@@ -1,13 +1,14 @@
-#include "../include/Scaner.h"
+#include "../include/Abilities/Scaner/Scaner.h"
 
 
 Scaner::Scaner(std::pair<int, int> coords, Field* pField)
-    : mCoords(coords), mField(pField) {} //mAbilityResult(pAbilityResult)
+    : mCoords(coords), mField(pField) {}
 
-void Scaner::applyAbility()
+IAbilityResult& Scaner::applyAbility()
 {
     int x = mCoords.first;
     int y = mCoords.second;
+    ScanerResult &result = *(new ScanerResult);
     for(int i = x; i <= x+1; i++)
         {
             for(int j = y; j <= y+1; j++)
@@ -16,23 +17,10 @@ void Scaner::applyAbility()
                 {
                     if(mField->isCellOccupied(i, j))
                     {
-                        std::cout << "battleships found\n";
-                        //mAbilityResult->shipsFound = true;
-                        return;
+                        result.shipsFound = true;
                     }
                 }
             }
         }
-        std::cout << "battleships not found\n";
+        return result;
 }
-
-// void Scaner::setField(Field & fieldObject)
-// {
-//     mFieldPointer = &fieldObject;
-// }
-
-// void Scaner::setCoords(int x, int y)
-// {
-//     this->x = x;
-//     this->y = y;
-// }

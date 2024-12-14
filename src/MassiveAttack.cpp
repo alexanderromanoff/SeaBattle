@@ -1,13 +1,10 @@
-#include "../include/MassiveAttack.h"
+#include "../include/Abilities/MassiveAttack/MassiveAttack.h"
 
-MassiveAttack::MassiveAttack(Field* pField) : mField(pField) {};
+MassiveAttack::MassiveAttack(TurnProperties* pProperties) : mProperties(pProperties) {};
 
-void MassiveAttack::applyAbility()
+IAbilityResult& MassiveAttack::applyAbility()
 {
-    std::cout << "mField->setAttackPower(2)\n";
+    mProperties->setAttackPower(2);
+    return *(new MassiveAttackResult);
 }
 
-// void MassiveAttack::setField(Field & fieldObject)
-// {
-//     mFieldPointer = &fieldObject;
-// }
