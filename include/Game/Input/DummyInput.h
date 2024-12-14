@@ -3,7 +3,7 @@
 
 #include "IOInterface.h"
 
-class DummyInput : public IOInterface
+class DummyInput //: public IOInterface
 {
 private:
     int horBound;
@@ -16,11 +16,11 @@ public:
     std::pair<int, int> readCoordinates();
     Battleship::Orientation readOrientation();
     std::string readCommand();
-    int readShipIndex();
+    void writeInfo(std::string info);
     
     // void getFromBot(int x, int y);
 
-    void setInfo(std::vector<std::string>); // DummyInput ONLY, mediator will know the type of device
+   // void setInfo(std::vector<std::string>); // DummyInput ONLY, mediator will know the type of device
 
 };
 

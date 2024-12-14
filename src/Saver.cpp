@@ -6,12 +6,13 @@
 using json = nlohmann::json;
 
 
-    std::ostream& operator<<(std::ostream& os, GameState& gState) {
+    std::ostream& operator<<(std::ostream& os, GameState& gState) 
+    {
         json jUser;
         json jDummy;
         json jHash;
-        StringOperator stringOp = *(new StringOperator);
-        SimpleEncryptor encryptor = *(new SimpleEncryptor);
+        StringOperator stringOp;
+        SimpleEncryptor encryptor;
 
         UserPlayer& user = *gState.getUser();
         jUser["userFieldHeight"] = user.getField().getHeight();
@@ -19,12 +20,14 @@ using json = nlohmann::json;
         jUser["userFieldState"] = stringOp.toStringField(user.getField());
         jUser["userShips"] = stringOp.toStringShips(user.getField());
         jUser["userAbilities"] = stringOp.toStringAbMan(user.getAbManager());
+        jUser["userProps"] = stringOp.toStringProperties(user.getProperties());
         
         DummyPlayer& dummy = *gState.getDummy();
         jDummy["dummyFieldHeight"] = dummy.getField().getHeight();
         jDummy["dummyFieldWidth"] = dummy.getField().getWidth();
         jDummy["dummyFieldState"] = stringOp.toStringField(dummy.getField());
         jDummy["dummyShips"] = stringOp.toStringShips(dummy.getField());
+        jDummy["dummyProps"] = stringOp.toStringProperties(dummy.getProperties());
 
 
         std::string serializedData = jUser.dump() + jDummy.dump();
@@ -49,8 +52,8 @@ using json = nlohmann::json;
         json jDummy = json::parse(dummyData);
         json jHash = json::parse(hash);
 
-        StringOperator stringOp = *(new StringOperator);
-        SimpleEncryptor encryptor = *(new SimpleEncryptor);
+        StringOperator stringOp;
+        SimpleEncryptor encryptor;
 
         std::string serializedData = jUser.dump() + jDummy.dump();
 
@@ -68,32 +71,33 @@ using json = nlohmann::json;
         int height = jUser["userFieldHeight"].get<int>();
         int width = jUser["userFieldWidth"].get<int>();
 
-        Field& nField = *(new Field(height, width));
-        ShipManager& nShipMan = *(new ShipManager);
-        AbilityManager& nAbMan = *(new AbilityManager);
+        Field& uField = *(new Field(height, width));
+        ShipManager& uShipMan = *(new ShipManager);
+        AbilityManager& uAbMan = *(new AbilityManager);
 
-        nField = stringOp.initFromStringField(jUser["userFieldState"].get<std::string>(), nField);
-        nShipMan =stringOp.initFromStringShips(jUser["userShips"].get<std::string>(), nField, nShipMan);
-        nAbMan = stringOp.initFromStringAbMan(jUser["userAbilities"].get<std::string>(), nAbMan);
+        uField = stringOp.initFromStringField(jUser["userFieldState"].get<std::string>(), uField);
+        uShipMan =stringOp.initFromStringShips(jUser["userShips"].get<std::string>(), uField, uShipMan);
+        uAbMan = stringOp.initFromStringAbMan(jUser["userAbilities"].get<std::string>(), uAbMan);
 
-        user->initUser(&nField, &nShipMan, &nAbMan);
+        user->initUser(&uField, &uShipMan, &uAbMan);
 
         DummyPlayer* dummy = gState.getDummy();
 
         height = jDummy["dummyFieldHeight"].get<int>();
         width = jDummy["dummyFieldWidth"].get<int>();
 
-        nField = *(new Field(height, width));
-        nShipMan = *(new ShipManager);
+        Field& dField = *(new Field(height, width));
+        ShipManager& dShipMan = *(new ShipManager);
 
-        nField = stringOp.initFromStringField(jDummy["dummyFieldState"].get<std::string>(), nField);
-        nShipMan = stringOp.initFromStringShips(jDummy["dummyShips"].get<std::string>(), nField, nShipMan);
+        dField = stringOp.initFromStringField(jDummy["dummyFieldState"].get<std::string>(), dField);
+        dShipMan = stringOp.initFromStringShips(jDummy["dummyShips"].get<std::string>(), dField, dShipMan);
 
-        dummy->initDummy(&nField, &nShipMan);
-
+        dummy->initDummy(&dField, &dShipMan);
 
         return is;
     }
+
+    Saver::Saver(std::string destination) : destination(destination) {}
 
     void Saver::save(GameState& gState) {
         std::ofstream ofs(destination);

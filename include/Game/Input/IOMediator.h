@@ -26,15 +26,13 @@ public:
 class ConcreteMediator : public IOMediator
 {
 private:
-    // read it from file(?)
-private:
-    ConsoleInput& mUserDevice;
-    DummyInput& mDummyDevice;
+    IOInterface& mUserDevice;
+    IOInterface& mDummyDevice;
     InputHandler& mHandler;
     UserPlayer* userColleague;
     DummyPlayer* dummyColleague;
 public:
-    ConcreteMediator(ConsoleInput& userDev, DummyInput& dumbDev, InputHandler& inpHandler);
+    ConcreteMediator(IOInterface& userDev, IOInterface& dumbDev, InputHandler& inpHandler);
     void callInput(Player* requester, Player::PlayerInputRequest reqType);
     void callOutput(Player* requester, Player::PlayerInputRequest reqType, const std::vector<std::string> message);
     void setUserColleague(UserPlayer* uPlayer);

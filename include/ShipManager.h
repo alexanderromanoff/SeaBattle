@@ -19,7 +19,7 @@ public:
     ~ShipManager();
 
     Battleship & getShipAtIndex(int index);
-
+    void processDeath();
     void createShip(int ship_size);
     void addShips(const std::map<int, int> & ships_info);
     void addShip(Battleship& ship_object);

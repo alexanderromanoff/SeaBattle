@@ -21,7 +21,8 @@ protected:
     AbilityManager* mAbManager = nullptr;
 
     bool isInitialized = false;
-    int mAliveShips;
+    //int mAliveShips;
+    int placingIndex = 0;
 
 public:                 
     enum PlayerInputRequest {PLACE_SHIP, COMMAND, MAKE_CHOICE, INFO, DATA};
@@ -30,7 +31,8 @@ public:
     virtual void makeChoice() = 0;
     virtual void processAttackResult(Field::Attack_Result atkRes, bool wasAttacked) = 0;
     virtual void processAbilityResult(IAbilityResult& abRes) = 0;
-    
+
+    int getPlIndex();
     bool isAlive();
     bool isInit();
 
@@ -38,12 +40,13 @@ public:
     ShipManager& getShManager();
     TurnProperties& getProperties();
     AbilityManager& getAbManager();
-    
+
+    std::map<int, int> getSetOfShips();
+
     Player(IOMediator& mediator); 
     Player(const Player& source);  
     Player & operator = (const Player& source);
-    // Player(Player&& source);
-    // Player & operator = (Player&& source);
+
     ~Player();
     
 };

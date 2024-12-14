@@ -15,13 +15,13 @@ GameController::~GameController()
 void GameController::initController(IOMediator* mediator)
 {
     mMediator = mediator;
-    mSaver = new Saver;
 }
 
 
 void GameController::setChoice()
 {
     UserPlayer placeholder = UserPlayer(*mMediator);
+    placeholder.connectToMediator();
     placeholder.makeChoice();
 
 }
@@ -29,42 +29,57 @@ void GameController::setChoice()
 
 void GameController::initGame()
 {
-    std::cout << "new game\n";
     UserPlayer *userPlayer = new UserPlayer(*mMediator);
     DummyPlayer *dummyPlayer = new DummyPlayer(*mMediator);
     userPlayer->initUser(fieldSizes, shipsMap);
     dummyPlayer->initDummy(fieldSizes, shipsMap);
+    userPlayer->connectToMediator();
+    dummyPlayer->connectToMediator();
     GameState* beginingState = new GameState(userPlayer, dummyPlayer);
-    defaultState = new GameState(userPlayer, dummyPlayer);
-    
-    mGame.setState(*beginingState);
-    mGame.startGame();
-    // mGame.currentState = beginingState;
+    mGame.startGame(*beginingState);
 }
 
 
 void GameController::saveProgress()
 {
+    Saver* saver = new Saver(savePath);
     GameState* state = mGame.getState();
-    mSaver->save(*state);
+    saver->save(*state);
+    delete saver;
 }
 
 void GameController::loadProgress()
 {
-    GameState* state = mGame.getState();
-    bool wasNotInit = false;
-    if(state == nullptr)
+    Saver* saver = new Saver(savePath);
+    UserPlayer *userPlayer = new UserPlayer(*mMediator);
+    DummyPlayer *dummyPlayer = new DummyPlayer(*mMediator);
+    GameState* state = new GameState(userPlayer, dummyPlayer);
+    try
     {
-        wasNotInit = true;
-        UserPlayer *userPlayer = new UserPlayer(*mMediator);
-        DummyPlayer *dummyPlayer = new DummyPlayer(*mMediator);
-        state = new GameState(userPlayer, dummyPlayer);
+        saver->load(*state);
     }
-    mSaver->load(*state);
-    if(wasNotInit)
+    catch(const std::exception& e)
     {
-        mGame.setState(*state);
+        std::cerr << e.what() << '\n';
+        delete saver;
+        return;
     }
+    if(!sizesInit)
+    {
+        int height = userPlayer->getField().getHeight();
+        int width =  userPlayer->getField().getWidth();
+        setFieldData({height, width});
+    }
+    if(!shipsInit)
+    {
+        std::map<int, int> shipsSet = userPlayer->getSetOfShips();
+        setShipsData(shipsSet);
+    }
+    userPlayer->connectToMediator();
+    dummyPlayer->connectToMediator();
+    delete saver;
+    mGame.startGame(*state);
+
 }
 
 void GameController::setFieldData(std::pair<int, int> sizes)
@@ -113,7 +128,7 @@ void GameController::selectCommand(CommandArgs& args)
             mGame.getAttacker().processAbilityResult(*(new TrollResult));    
             return;                                            
         }                                                   
-        switch (code)                                       // if the top ability is scaner, so mb should move this check to mediator
+        switch (code)                                    
         {
             case AbilityManager::AbilitiesCodes::SCANER:
             {
@@ -191,7 +206,8 @@ void GameController::controlGame()
         return;
     }
 
-    std::cout <<"winner detected ";
+    std::cout <<" ";
+
     if(currentAttacker == mGame.getState()->getUser())
     {  
         Player* loser = mGame.getState()->getUser();
@@ -200,13 +216,17 @@ void GameController::controlGame()
     }
     else
     {
-        currentAttacker->processAttackResult(Field::Attack_Result::Defeat, false);
+        Player* winner = mGame.getState()->getUser();
+        winner->processAttackResult(Field::Attack_Result::Defeat, false);
         UserPlayer* copiedUser = new UserPlayer(*mGame.getState()->getUser());
-        DummyPlayer *newDummy = new DummyPlayer(*mMediator);
+        DummyPlayer* newDummy = new DummyPlayer(*mMediator);
         newDummy->initDummy(fieldSizes, shipsMap);
+
+        copiedUser->connectToMediator();
+        newDummy->connectToMediator();
         GameState* newState = new GameState(copiedUser, newDummy);
-        mGame.setState(*newState);
-        mGame.startGame();
+        mGame.startGame(*newState);
+        // mGame.startGame();
     }
 }
 

@@ -3,7 +3,7 @@
 #include "../include/Players/DummyPlayer.h"
 
 
-ConcreteMediator::ConcreteMediator(ConsoleInput& userDev, DummyInput& dumbDev, InputHandler& inpHandler) :
+ConcreteMediator::ConcreteMediator(IOInterface& userDev, IOInterface& dumbDev, InputHandler& inpHandler) :
 mUserDevice(userDev), mDummyDevice(dumbDev), mHandler(inpHandler) {}
 
 void ConcreteMediator::callInput(Player* requester, Player::PlayerInputRequest reqType)
@@ -15,14 +15,14 @@ void ConcreteMediator::callInput(Player* requester, Player::PlayerInputRequest r
         case Player::PlayerInputRequest::PLACE_SHIP:
         {
             mHandler.newArgs();
-            mHandler.handleCommandName(userColleague, "PLACE");
+            mHandler.setCommandExplicitly(CommandArgs::CommandType::PLACE);
             
-            int index = mUserDevice.readShipIndex();
-            while (!mHandler.handleIndex(userColleague, index))
-            {
-                mUserDevice.writeInfo("у тебя нет столько кораблей, ты балбес ");
-                index = mUserDevice.readShipIndex();
-            }
+            int index = requester->getPlIndex();
+            int size = requester->getShManager().getShipAtIndex(index).getNumberOfSegments();
+            mHandler.handleIndex(userColleague, index);
+
+            mUserDevice.writeInfo("Размещаем корабль размером " + std::to_string(size));
+
             std::pair<int, int> coords = mUserDevice.readCoordinates();
             while(!mHandler.handleCoordinates(userColleague, coords))
             {
@@ -98,7 +98,26 @@ void ConcreteMediator::callInput(Player* requester, Player::PlayerInputRequest r
 
                 case CommandArgs::CommandType::INFO:
                 {
-                    mUserDevice.viewAbility(userColleague->getAbManager().viewAvaliableAbilities());
+                    switch (requester->getAbManager().viewAvaliableAbilities())
+                    {
+                    case 0:
+                        mUserDevice.writeInfo("Massive attack\n");
+                        break;
+                    case 1:
+                        mUserDevice.writeInfo("Shelling\n");
+                        break;
+
+                    case 2:
+                        mUserDevice.writeInfo( "Scaner\n");
+                        break;
+                    
+                    case 3:
+                        mUserDevice.writeInfo("No ablities\n");
+                        break;
+
+                    default:
+                        break;
+                    }
                     return;
                 }
 
@@ -121,6 +140,7 @@ void ConcreteMediator::callInput(Player* requester, Player::PlayerInputRequest r
         case Player::PlayerInputRequest::MAKE_CHOICE:
         {
             mHandler.newArgs();
+            mUserDevice.writeInfo("Сделайте выбор ");
             std::string commandName = mUserDevice.readCommand();
             bool validChoice = mHandler.handleGameStart(userColleague, commandName);
             CommandArgs::CommandType commandType = mHandler.handleCommandName(userColleague, commandName);
@@ -191,10 +211,12 @@ void ConcreteMediator::callInput(Player* requester, Player::PlayerInputRequest r
         case Player::PlayerInputRequest::PLACE_SHIP:
         {   
             mHandler.newArgs();
-            mHandler.handleCommandName(dummyColleague, "PLACE");
-            int index = mDummyDevice.readShipIndex();
-            mHandler.handleIndex(dummyColleague, dummyColleague->getPlIndex());
+            mHandler.setCommandExplicitly(CommandArgs::CommandType::PLACE);
+            int index = requester->getPlIndex();
+            mHandler.handleIndex(dummyColleague, index);
             std::pair<int, int> coords = mDummyDevice.readCoordinates();
+            coords.first %= requester->getField().getWidth();
+            coords.second %= requester->getField().getHeight();
             while(!mHandler.handleCoordinates(dummyColleague, coords))
             {
                 coords = mDummyDevice.readCoordinates();   
@@ -208,12 +230,14 @@ void ConcreteMediator::callInput(Player* requester, Player::PlayerInputRequest r
         case Player::PlayerInputRequest::COMMAND:
         {
             mHandler.newArgs();
-            mHandler.handleCommandName(dummyColleague, "ATK");
+            mHandler.setCommandExplicitly(CommandArgs::CommandType::ATTACK);
             // mUserDevice.writeInfo("бот думает...");
             std::pair<int, int> coords = mDummyDevice.readCoordinates();
             while(!mHandler.handleCoordinates(dummyColleague, coords))
             {
-                coords = mDummyDevice.readCoordinates();   
+                coords = mDummyDevice.readCoordinates(); 
+                coords.first %= requester->getField().getWidth();
+                coords.second %= requester->getField().getHeight();   
             }
             mHandler.runContr();
             return;
@@ -247,12 +271,6 @@ void ConcreteMediator::callOutput(Player* requester, Player::PlayerInputRequest 
     {
         switch (reqType)
         {
-        case Player::PlayerInputRequest::DATA:
-        {
-
-            mDummyDevice.setInfo(message);
-            return;
-        }
         case Player::PlayerInputRequest::INFO:
         {
             for(auto& item: message)

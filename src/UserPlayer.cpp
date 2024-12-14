@@ -39,7 +39,7 @@ void UserPlayer::placeShips()
             }
             
         } while (!success);
-        
+        placingIndex++;
         
         // mObserver.handleEvent(*this);
     }
@@ -72,7 +72,7 @@ void UserPlayer::processAttackResult(Field::Attack_Result atkRes, bool wasAttack
             mMediator.callOutput(this, Player::PlayerInputRequest::INFO, {UserPlayer::WRECK});
             break;
         case Field::Attack_Result::Defeat:
-            mMediator.callOutput(this, Player::PlayerInputRequest::INFO, {"u won bro"});
+            mMediator.callOutput(this, Player::PlayerInputRequest::INFO, {"великая победа, капитан, новый раунд "});
 
         default:
             break;
@@ -84,10 +84,10 @@ void UserPlayer::processAttackResult(Field::Attack_Result atkRes, bool wasAttack
         switch (atkRes)
         {
         case Field::Attack_Result::Wreck:
-            mAliveShips--;
+            mShManager->processDeath();
             break;
         case Field::Attack_Result::Defeat:
-            mMediator.callOutput(this, Player::PlayerInputRequest::INFO, {"u dead bro"});
+            mMediator.callOutput(this, Player::PlayerInputRequest::INFO, {"делааа... поражение, кэп "});
             break;
         default:
             break;
@@ -95,6 +95,7 @@ void UserPlayer::processAttackResult(Field::Attack_Result atkRes, bool wasAttack
         // mObserver.handleEvent(*this);
     }
     mProperties->switchBlock(false);
+    mProperties->setAttackPower(1);
     
 
 }
@@ -111,7 +112,8 @@ void UserPlayer::initUser(std::pair<int, int> &fieldSize, std::map<int, int> &sh
     mShManager = new ShipManager(shipsMap);
     mAbManager = new AbilityManager;
     mProperties = new TurnProperties;
-    mAliveShips = mShManager->getNumberOfShips();
+   // mAliveShips = mShManager->getNumberOfShips();
+    // connectToMediator();
 }
 
 void UserPlayer::initUser(Field* field, ShipManager* shMan, AbilityManager* abMan)
@@ -120,17 +122,22 @@ void UserPlayer::initUser(Field* field, ShipManager* shMan, AbilityManager* abMa
     mShManager = shMan;
     mAbManager = abMan;
     mProperties = new TurnProperties;
-    mAliveShips = mShManager->getNumberOfShips();
+   // mAliveShips = mShManager->getNumberOfShips();
     isInitialized = true;
+    // connectToMediator();
+}
+
+
+void UserPlayer::connectToMediator()
+{
+    mMediator.setUserColleague(this);
 }
 
 UserPlayer::UserPlayer(IOMediator& mediator) : Player(mediator) 
 {
-    mediator.setUserColleague(this);
 }
 UserPlayer::UserPlayer(const UserPlayer& source) : Player(source) 
 {
-    mMediator.setUserColleague(this);
 } 
 
 UserPlayer & UserPlayer::operator = (const UserPlayer& source)
@@ -160,7 +167,7 @@ UserPlayer & UserPlayer::operator = (const UserPlayer& source)
         {
             mAbManager = new AbilityManager(*source.mAbManager);
         }
-        mAliveShips = source.mAliveShips;   
+       // mAliveShips = source.mAliveShips;   
         isInitialized = source.isInitialized;    
     }  
     return *this; 

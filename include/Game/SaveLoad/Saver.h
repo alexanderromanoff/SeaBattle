@@ -3,6 +3,8 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include <fstream>
+#include <iostream>
+#include <set>
 #include "../GameState.h"
 #include "../../Players/Player.h"
 #include "StringOperator.h"
@@ -13,9 +15,9 @@ using json = nlohmann::json;
 class Saver
 {
 private:
-    const std::string destination = "/home/alex/sea_battle/src/save.txt";
+    const std::string destination;
 public:
-
+    Saver(std::string destination);
     friend std::ostream& operator<<(std::ostream& os, const GameState& gState);
     friend std::istream& operator>>(std::istream& is, GameState& gState);
     void save(GameState& gState);
@@ -48,7 +50,6 @@ const int SHIFT = 3;
         return output;
     }
 
-    // Функция для вычисления простого хэша
     unsigned long hash(const std::string& str) 
     {
         unsigned long hash = 5381;

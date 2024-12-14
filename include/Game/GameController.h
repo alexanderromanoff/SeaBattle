@@ -18,10 +18,9 @@ class GameController
 private:
 
     Game& mGame;
-    GameState* defaultState = nullptr;
     IOMediator* mMediator;
+    std::string savePath = "svae1.txt";
 
-    Saver* mSaver;
 private:
     int count  = 0;
     bool sizesInit = false;
@@ -41,7 +40,6 @@ public:
     std::pair<int, int> getFieldSizes();
     void setShipsData(std::map<int, int> shipsMap);
     void controlGame();
-    void newWave();
     void saveProgress();
     void loadProgress();
     void selectCommand(CommandArgs& args);

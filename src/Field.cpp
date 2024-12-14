@@ -158,7 +158,7 @@
                 if(isCellOccupied(i, j))
                 {
                     suitable = false;
-                    throw CollisionException();
+                    throw CollisionException(i, j);
                     break;
                 }
             }
@@ -232,60 +232,6 @@
         }
     }
 
-    // std::string Field::getInfoStr() const
-    // {
-    //     std::string stateString;
-
-    //     for(int i = 0; i < mVerticalSize; i++)
-    //     {
-    //         for(int j = 0; j < mHorizontalSize; j++)
-    //         {
-    //             Field::Cell::CELL_STATES state = mFieldMap[i][j].getState();
-    //             switch (state)
-    //             {
-    //             case Field::Cell::CELL_STATES::UNKNOWN:
-    //                 stateString += "0";
-    //                 break;
-    //             case Field::Cell::CELL_STATES::EMPTY:
-    //                 stateString += "1";
-    //                 break;
-    //             case Field::Cell::CELL_STATES::SHIP_EXISTS:
-    //                 stateString += "2";
-    //                 break;
-    //             default:
-    //                 break;
-    //             }
-                
-    //         }
-    //     }
-    //     return stateString;
-    // }
-
-    // void Field::setInfoFromStr(std::string info)
-    // {
-    //      for(int i = 0; i < mVerticalSize; i++)
-    //     {
-    //         for(int j = 0; j < mHorizontalSize; j++)
-    //         {
-    //             char state = info[i*j + j];
-    //             switch (state)
-    //             {
-    //             case '0':
-    //                 mFieldMap[i][j].setState(Field::Cell::CELL_STATES::UNKNOWN);
-    //                 break;
-    //             case '1':
-    //                 mFieldMap[i][j].setState(Field::Cell::CELL_STATES::EMPTY);
-    //                 break;
-    //             case '2':
-    //                 mFieldMap[i][j].setState(Field::Cell::CELL_STATES::SHIP_EXISTS);
-    //                 break;
-                
-    //             default:
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
 
 
     std::map<std::pair<int, int>, Battleship*> Field::getShips()

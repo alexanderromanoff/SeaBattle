@@ -38,7 +38,6 @@ Field::Attack_Result Field::Cell::attack(int attackPower) // будет возв
 
     case CELL_STATES::SHIP_EXISTS:
         mShipPointer->takeDamage(mShipSegmentNumber, attackPower);   
-        std::cout << mShipPointer->getSegmentHealth(mShipSegmentNumber);
         if(mShipPointer->getSegmentHealth(mShipSegmentNumber) == 0)
         {
             mCellState = CELL_STATES::SHIP_DESTROYED;

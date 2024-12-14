@@ -23,12 +23,32 @@ AbilityManager& Player::getAbManager()
 
 bool Player::isAlive()
 {
-    return mAliveShips != 0;
+    return mShManager->getNumberOfAliveShips() != 0;
 }
 
 bool Player::isInit()
 {
     return isInitialized;
+}
+
+int Player::getPlIndex()
+{
+    return placingIndex;
+}
+
+std::map<int, int> Player::getSetOfShips()
+{
+    std::map<int, int> res;
+    res.insert({1, 0});
+    res.insert({2, 0});
+    res.insert({3, 0});
+    res.insert({4, 0});
+    for(int i = 0; i < mShManager->getNumberOfShips(); i++)
+    {
+        int key = mShManager->getShipAtIndex(i).getNumberOfSegments();
+        res[key] += 1;
+    }
+    return res;
 }
 
 Player::Player(IOMediator& mediator) : mMediator(mediator) {}
@@ -53,7 +73,7 @@ Player::Player(const Player& source) : mMediator(source.mMediator)
     {
         mAbManager = new AbilityManager(*source.mAbManager);
     }
-    mAliveShips = source.mAliveShips;   
+   // mAliveShips = source.mAliveShips;   
     isInitialized = source.isInitialized; 
 
 }
@@ -81,7 +101,7 @@ Player &Player::operator = (const Player& source)
         {
             mAbManager = new AbilityManager(*source.mAbManager);
         }
-        mAliveShips = source.mAliveShips;       
+       // mAliveShips = source.mAliveShips;       
     }  
     return *this; 
 }

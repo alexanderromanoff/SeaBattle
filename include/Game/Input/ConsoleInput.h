@@ -8,7 +8,7 @@
 
 #include "IOInterface.h"
 
-class ConsoleInput : public IOInterface
+class ConsoleInput //: public IOInterface
 {
 private:
     std::fstream console;
@@ -20,7 +20,7 @@ public:
     std::pair<int, int> readCoordinates();
     Battleship::Orientation readOrientation();
     std::string readCommand();
-    int readShipIndex();
+    // int readShipIndex();
 
     void viewAbility(AbilityManager::AbilitiesCodes code); 
     void writeInfo(std::string); 

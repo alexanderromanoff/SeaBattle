@@ -12,10 +12,8 @@ Game::Game()
 void Game::attackPlayer(int x, int y)
 {
     Field& targetField = target->getField();
-    // int attackPower = attacker->getProperties().attackPower; // return this back
-    // game displayer should be HERE!
-
-    Field::Attack_Result atkRes = targetField.attackCell(x, y, 1);
+    int attackPower = attacker->getProperties().attackPower; 
+    Field::Attack_Result atkRes = targetField.attackCell(x, y, attackPower);
     attacker->processAttackResult(atkRes, false);
     target->processAttackResult(atkRes, true);
     if(atkRes != Field::Attack_Result::Invalid)
@@ -25,10 +23,7 @@ void Game::attackPlayer(int x, int y)
         {
             mObservers[i]->handleEvent(*getState());
         }
-    }
-    
-    
-    
+    }    
 }
 
 void Game::addObserver(GameObserver* observer)
@@ -62,23 +57,15 @@ void Game::setState(GameState& state)
 {
     if (currentState != nullptr)
     {
-         delete currentState;
+        delete currentState;
     }
 
     currentState = &state;
-    roundNumber++;
-    // if (roundNumber > 4)
-    // {
-    //     exit(69);
-    // }
 }
 
-void Game::startGame()
+void Game::startGame(GameState& state)
 {
-    if(currentState == nullptr)
-    {
-        throw std::runtime_error("game not init");
-    }
+    setState(state);
 
     DummyPlayer& dPlayer = *currentState->getDummy();
     UserPlayer& uPlayer = *currentState->getUser();
@@ -93,6 +80,12 @@ void Game::startGame()
         setAttacker(uPlayer);
         uPlayer.placeShips();
     }
+
+    for(int i = 0; i < mObservers.size(); i++)
+    {
+        mObservers[i]->handleEvent(*getState());
+    }
+
     setAttacker(uPlayer);
     setTarget(dPlayer); // nice take)))) if user is init
                         // bot starts a war with itself
@@ -101,21 +94,14 @@ void Game::startGame()
 
 Player* Game::runGame()
 {
-    // while(1)
-    // {
-    
-    //     if(!target->isAlive())
-    //     {
-    //        break;
-    //     }
-    // }
     playRound();
-    return &getAttacker();
     
+    return &getAttacker();
 }
 
 void Game::playRound()
 {
+
     attacker->makeMove();
 }
 

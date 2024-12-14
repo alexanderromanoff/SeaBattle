@@ -50,11 +50,11 @@ std::string StringOperator::toStringShips(Field& field)
         shipsString += std::to_string(ship->getNumberOfSegments());
         if (ornt == Battleship::Orientation::VERTICAL)
         {
-            shipsString += "1";
+            shipsString += "2";
         }
         else
         {
-            shipsString += "2";
+            shipsString += "1";
         }
         for(int i = 0; i < ship->getNumberOfSegments(); i++)
         {
@@ -83,14 +83,40 @@ std::string StringOperator::toStringAbMan(AbilityManager& abMan)
     return abilityString;
 }
 
+std::string StringOperator::toStringProperties(TurnProperties& tProps)
+{
+    return std::to_string(tProps.attackPower) + std::to_string(tProps.abilityBlocked);
+}
+
+std::string StringOperator::toStringFieldSizes(std::pair<int, int> fSizes)
+{
+    return std::to_string(fSizes.first) + " " + std::to_string(fSizes.second);
+}
+
+std::string StringOperator::toStringShipsMap(std::map<int, int> shMap)
+{
+    std::string res;
+    for(auto& item : shMap)
+    {
+        res += std::to_string(item.second);
+    }
+    return res;
+}
+
 Field& StringOperator::initFromStringField(std::string info, Field& field)
 {
     std::vector<std::vector<Field::Cell::CELL_STATES>> cellStates = field.getCellStates();
-    for(int i = 0; i < field.getHeight(); i++)
+    int index = 0; // Linear index for the serialized info string
+    for (int i = 0; i < field.getHeight(); i++)
     {
-        for(int j = 0; j < field.getWidth(); j++)
+        for (int j = 0; j < field.getWidth(); j++)
         {
-            char state = info[i*j + j];
+            if (index >= info.size())
+            {
+                throw std::runtime_error("String data is insufficient to reconstruct the field.");
+            }
+
+            char state = info[index++];
             switch (state)
             {
             case '0':
@@ -109,14 +135,14 @@ Field& StringOperator::initFromStringField(std::string info, Field& field)
                 cellStates[i][j] = Field::Cell::CELL_STATES::SHIP_DESTROYED;
                 break;
             default:
-                break;
+                throw std::runtime_error("Unexpected state character in field data.");
             }
-            
         }
     }
     field.setCellStates(cellStates);
     return field;
 }
+
 
 ShipManager& StringOperator::initFromStringShips(std::string info, Field& field, ShipManager& shMan)
 {
@@ -124,13 +150,21 @@ ShipManager& StringOperator::initFromStringShips(std::string info, Field& field,
     std::string line;
     while(std::getline(stream, line)) // get Xcoord
     {
-        int xCoord = std::stoi(line);
-        std::getline(stream, line); // get yCoord
         int yCoord = std::stoi(line);
+        std::getline(stream, line); // get yCoord
+        int xCoord = std::stoi(line);
         std::getline(stream, line); // get ship info
         std::string shipInfo = line;
         Battleship& newShip = buildShip(shipInfo);
-        field.placeShip(newShip, xCoord, yCoord, newShip.getOrientation());
+        try
+        {
+            field.placeShip(newShip, xCoord, yCoord, newShip.getOrientation());
+        }
+        catch(CollisionException& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        
         shMan.addShip(newShip);
     } 
     return shMan;
@@ -178,4 +212,33 @@ Battleship& StringOperator::buildShip(const std::string& shipInfo)
         shipObject->setSegmentHealth(i - 2, health);
     }
     return *shipObject;
+}
+
+void StringOperator::initFromStringTProps(std::string info, TurnProperties& tProps)
+{
+    tProps.setAttackPower(info[0] - '0');
+    tProps.switchBlock(info[1] - '0');
+}
+
+std::pair<int, int> StringOperator::initFromStringFieldSizes(std::string info)
+{
+    size_t spacePos = info.find(' ');
+    int hor = std::stoi(info.substr(0, spacePos));
+    int ver = std::stoi(info.substr(spacePos, info.size()));
+    return {hor, ver};
+}
+
+std::map<int, int> StringOperator::initFromStringShipsMap(std::string info)
+{
+    std::map<int, int> res;
+    res.insert({1, 0});
+    res.insert({2, 0});
+    res.insert({3, 0});
+    res.insert({4, 0});
+    for(int i = 0; i < info.size(); i++)
+    {
+        int key = info[i] - '0';
+        res[key] += 1;
+    }
+    return res;
 }

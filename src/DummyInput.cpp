@@ -16,8 +16,8 @@ std::map<int, int> DummyInput::readShipsMap()
 
 std::pair<int, int> DummyInput::readCoordinates()
 {
-    int x = rand() % horBound;
-    int y = rand() % verBound;
+    int x = rand();
+    int y = rand();
     return {x, y};
 }
 
@@ -39,15 +39,20 @@ std::string DummyInput::readCommand()
     return command;
 }
 
-
-void DummyInput::setInfo(std::vector<std::string> str)
+void DummyInput::writeInfo(std::string info)
 {
-    horBound = std::stoi(str[0]);
-    verBound = std::stoi(str[1]);
+
 }
 
-int DummyInput::readShipIndex()
-{
-    // std::cout << curShipIndex;
-    return curShipIndex++;
-}
+
+// void DummyInput::setInfo(std::vector<std::string> str)
+// {
+//     horBound = std::stoi(str[0]);
+//     verBound = std::stoi(str[1]);
+// }
+
+// int DummyInput::readShipIndex()
+// {
+//     // std::cout << curShipIndex;
+//     return curShipIndex++;
+// }

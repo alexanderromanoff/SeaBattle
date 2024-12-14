@@ -3,6 +3,7 @@
 
 #include <string>
 #include <sstream>
+#include <map>
 // #include "../Players/DummyPlayer.h"
 // #include "../Players/UserPlayer.h"
 
@@ -12,7 +13,8 @@ class DummyPlayer;
 class GameState
 {
 private:
-
+    std::pair<int,  int> fieldSizes = {10, 10};
+    std::map<int, int>  shipsMap = {{1, 4}, {2, 3}, {3, 2}, {4, 1}};
     UserPlayer* userPlayer = nullptr;
     DummyPlayer* dummyPlayer = nullptr; // при загрузке подаем класс шде игроки пока пустые
 
@@ -27,8 +29,11 @@ public:
 
     UserPlayer* getUser();
     DummyPlayer* getDummy();
-    // std::string getUserInfo() const;
-    // std::string getDummyInfo() const;
+    std::pair<int,  int> getFieldSizes();
+    std::map<int, int> getShipsMap();
+    void setFieldSizes(std::pair<int,  int>);
+    void setShipsMap(std::map<int, int>);
+
 
 };
 

@@ -11,10 +11,6 @@ void DummyPlayer::makeMove()
     
 }
 
-int DummyPlayer::getPlIndex()
-{
-    return placingIndex;
-}
 
 void DummyPlayer::placeShips()
 {
@@ -61,7 +57,7 @@ void DummyPlayer::processAttackResult(Field::Attack_Result atkRes, bool wasAttac
     {
         if(wasAttacked)
         {
-            mAliveShips--;
+            mShManager->processDeath();
         }
     }
     // if(wasAttacked)
@@ -80,37 +76,36 @@ void DummyPlayer::initDummy(std::pair<int, int> &fieldSize, std::map<int, int> &
 {
     mField = new Field(fieldSize.first, fieldSize.second);
     mShManager = new ShipManager(shipsMap);
-    // mAbManager = new AbilityManager;
-    // mProperties = new TurnProperties;
-    mAliveShips = mShManager->getNumberOfShips();
-    std::string hor = std::to_string(mField->getWidth());
-    std::string ver = std::to_string(mField->getHeight());
-    mMediator.callOutput(this, Player::PlayerInputRequest::DATA, {hor, ver});
+    mProperties = new TurnProperties;
+    mProperties->switchBlock(false);
+   // mAliveShips = mShManager->getNumberOfShips();
+    // connectToMediator();
 }
 
 void DummyPlayer::initDummy(Field* field, ShipManager* shMan)
 {
     mField = field;
     mShManager = shMan;
-    // mAbManager = new AbilityManager; // aren't required
-    // mProperties = new TurnProperties; // so they we can use just new empty instances
-    std::string hor = std::to_string(mField->getWidth());
-    std::string ver = std::to_string(mField->getHeight());
-
-    mMediator.callOutput(this, Player::PlayerInputRequest::DATA, {hor, ver});
-    mAliveShips = mShManager->getNumberOfShips();
+    mProperties = new TurnProperties;
+    mProperties->switchBlock(false);
+  //  mAliveShips = mShManager->getNumberOfShips();
     isInitialized = true;
+    // connectToMediator();
 
+}
+
+void DummyPlayer::connectToMediator()
+{
+    mMediator.setDummyColleague(this);
 }
 
 DummyPlayer::DummyPlayer(IOMediator& mediator) : Player(mediator)
 {
-    mediator.setDummyColleague(this);
+   
 }
 
 DummyPlayer::DummyPlayer(const DummyPlayer& source):Player(source) 
 {
-    mMediator.setDummyColleague(this);
 }
 
 DummyPlayer& DummyPlayer::operator = (const DummyPlayer& source)
@@ -118,8 +113,6 @@ DummyPlayer& DummyPlayer::operator = (const DummyPlayer& source)
     if(&source != this)
     {
         mMediator = source.mMediator;
-
-        mMediator.setDummyColleague(this);
 
         mField = new Field(*source.mField);
         mShManager = new ShipManager;
@@ -139,7 +132,7 @@ DummyPlayer& DummyPlayer::operator = (const DummyPlayer& source)
         {
             mAbManager = new AbilityManager(*source.mAbManager);
         }
-        mAliveShips = source.mAliveShips;   
+       // mAliveShips = source.mAliveShips;   
         isInitialized = source.isInitialized;    
     }  
     return *this;

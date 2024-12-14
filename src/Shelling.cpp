@@ -24,5 +24,9 @@ IAbilityResult& Shelling::applyAbility()
     std::vector<int> segmentsToAttackIndices = shipObject->getAliveSegmentsIndices();
     int randomSegmentIndex = rand() % segmentsToAttackIndices.size();
     shipObject->takeDamage(randomSegmentIndex, 1);
+    if(!shipObject->isAlive())
+    {
+        mShipManager->processDeath();
+    }
     return res;
 }

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <algorithm>
+#include <fstream>
 #include "../CommandArgs.h"
 #include "../../Players/Player.h"
 
@@ -12,14 +13,37 @@ class GameController;
 class InputHandler // used by mediator
 {
 private:
-    std::map<std::string, CommandArgs::CommandType> inputMap   {{"ATK", CommandArgs::CommandType::ATTACK},
-                                                                {"PLACE", CommandArgs::CommandType::PLACE},
-                                                                {"ABL", CommandArgs::CommandType::ABILITY},
-                                                                {"SAVE", CommandArgs::CommandType::SAVE},
-                                                                {"LOAD", CommandArgs::CommandType::LOAD},
-                                                                {"NEW_GAME", CommandArgs::CommandType::NEW_GAME},
-                                                                {"QUIT", CommandArgs::CommandType::QUIT},
-                                                                {"INFO", CommandArgs::CommandType::INFO}};
+    std::vector<std::string> defaultInputs {"ATK", 
+                                            "PLACE", 
+                                            "ABL", 
+                                            "SAVE", 
+                                            "LOAD", 
+                                            "NEW_GAME", 
+                                            "QUIT", 
+                                            "INFO"};
+
+    std::vector<CommandArgs::CommandType> availableCommands {CommandArgs::CommandType::ATTACK,
+                                                             CommandArgs::CommandType::PLACE,
+                                                             CommandArgs::CommandType::ABILITY,
+                                                             CommandArgs::CommandType::SAVE,
+                                                             CommandArgs::CommandType::LOAD,
+                                                             CommandArgs::CommandType::NEW_GAME,
+                                                             CommandArgs::CommandType::QUIT,
+                                                             CommandArgs::CommandType::INFO};
+
+    // std::map<std::string, CommandArgs::CommandType> defaultInputMap     {{"ATK", CommandArgs::CommandType::ATTACK},
+    //                                                                     {"PLACE", CommandArgs::CommandType::PLACE},
+    //                                                                     {"ABL", CommandArgs::CommandType::ABILITY},
+    //                                                                     {"SAVE", CommandArgs::CommandType::SAVE},
+    //                                                                     {"LOAD", CommandArgs::CommandType::LOAD},
+    //                                                                     {"NEW_GAME", CommandArgs::CommandType::NEW_GAME},
+    //                                                                     {"QUIT", CommandArgs::CommandType::QUIT},
+    //                                                                     {"INFO", CommandArgs::CommandType::INFO}};
+
+    std::map<std::string, CommandArgs::CommandType> inputMap;
+
+
+    const std::string inpMapPath = "/home/alex/sea_battle/src/inpMap.txt";
 
     CommandArgs* currentComArgs = nullptr;
 
@@ -34,7 +58,9 @@ public:
     bool handleGameStart(Player* player, std::string startCommandStr);
     bool handleOrientation(Player* player, Battleship::Orientation orientation);
     bool handleIndex(Player* player,  int index);
+    void setCommandExplicitly(CommandArgs::CommandType commandType);
     void runContr();
+    std::map<std::string, CommandArgs::CommandType> readInputMap();
     // orientation input validity is checked on the spot
 
 };

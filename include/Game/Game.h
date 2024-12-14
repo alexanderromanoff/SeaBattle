@@ -31,7 +31,7 @@ public:
     void setShipsData(std::map<int, int> shipsMap);
     void setFieldData(std::pair<int, int> sizes);
     void addObserver(GameObserver* observer);
-    void startGame();
+    void startGame(GameState& state);
     Player* runGame();
     void setState(GameState& state);
     void setAttacker(Player& player);

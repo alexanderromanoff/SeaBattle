@@ -6,6 +6,7 @@
 #include "../include/Game/Input/DummyInput.h"
 #include "../include/Game/Input/ConsoleInput.h"
 #include "../include/Game/Input/InputHandler.h"
+#include "../include/Game/Input/IOInterface.h"
 
 #include "../include/Game/SaveLoad/Saver.h"
 
@@ -24,10 +25,14 @@ int main()
     // UserObserver* uObserver = new UserObserver(*output);
     // DummyObserver* dObserver = new DummyObserver(*output);
 
-    ConsoleInput* userInput = new ConsoleInput("/dev/pts/0");
-    DummyInput* dummyInput = new DummyInput;
+   // ConsoleInput* userInput = new ConsoleInput("/dev/pts/0");
+    // DummyInput* dummyInput = new DummyInput;
+
     InputHandler* handler = new InputHandler(*gContr);
+    IODeviceWrapper<ConsoleInput>* userInput = new IODeviceWrapper<ConsoleInput>("/dev/pts/0");
+    IODeviceWrapper<DummyInput>* dummyInput = new IODeviceWrapper<DummyInput>();
     IOMediator* mediator = new ConcreteMediator(*userInput, *dummyInput, *handler);
+
 
 
     gContr->initController(mediator);
@@ -36,7 +41,7 @@ int main()
     {
         gContr->controlGame();
     }
-    std::cout  << "quit bro";
+    std::cout  << "quit\n";
     delete mediator;
     delete handler;
     delete dummyInput;

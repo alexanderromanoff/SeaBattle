@@ -28,6 +28,16 @@
         return mAvailableShips.size();
     }
 
+    int ShipManager::getNumberOfAliveShips()
+    {
+        return aliveShips;
+    }
+
+    void ShipManager::processDeath()
+    {
+        aliveShips--;
+    }
+
     void ShipManager::addShips(const std::map<int, int> & shipsInfo) // map element: <ship length, number of such ships>
     {
         for(auto& item : shipsInfo)

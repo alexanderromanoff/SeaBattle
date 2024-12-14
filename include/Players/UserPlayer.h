@@ -25,6 +25,7 @@ public:
     void makeChoice();
     void processAttackResult(Field::Attack_Result atkRes, bool wasAttacked);
     void processAbilityResult(IAbilityResult& abRes);
+    void connectToMediator();
 };
 
 #endif
